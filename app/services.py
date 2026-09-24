@@ -1,13 +1,11 @@
 from typing import Any
 
 from app.exceptions import EmailNotFoundError
-from app.repositories import JsonEmailRepository
-
-
-repository = JsonEmailRepository()
+from app.repositories import DatabaseEmailRepository, JsonEmailRepository
 
 
 def list_emails(
+    repository: DatabaseEmailRepository | JsonEmailRepository,
     sender: str | None = None,
     subject: str | None = None,
 ) -> list[dict[str, Any]]:
@@ -21,7 +19,7 @@ def list_emails(
     return emails
 
 
-def find_email(email_id: str) -> dict[str, Any]:
+def find_email(email_id: str, repository: DatabaseEmailRepository | JsonEmailRepository) -> dict[str, Any]:
     email = repository.find_by_id(email_id)
     if email is None:
         raise EmailNotFoundError("Email not found")
