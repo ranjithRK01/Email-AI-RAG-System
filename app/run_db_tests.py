@@ -11,6 +11,7 @@ from sqlalchemy import URL
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run all tests against the migrated, seeded local PostgreSQL database.")
     parser.add_argument("--prompt", action="store_true", help="Prompt for local test database credentials.")
+    parser.add_argument("--repository-only", action="store_true", help="Run isolated repository tests; requires migrated schema but no seed data.")
     args = parser.parse_args()
     environment = os.environ.copy()
     if args.prompt:
@@ -31,8 +32,9 @@ def main() -> int:
         return 2
     environment.pop("DATABASE_URL", None)
     root = Path(__file__).resolve().parents[1]
+    target = "tests/test_repository_integration.py" if args.repository_only else "tests"
     result = subprocess.run(
-        [sys.executable, "-m", "pytest", "tests", "-q", "--tb=short"],
+        [sys.executable, "-m", "pytest", target, "-q", "--tb=short"],
         cwd=root, env=environment, check=False,
     )
     return result.returncode

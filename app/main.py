@@ -5,11 +5,12 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.emails import router as emails_router
-from app.exceptions import EmailNotFoundError
+from app.exceptions import EmailNotFoundError, InvalidEmailQueryError
 from app.health import router
 from app.request_logging import log_request
 from app.config import settings
 from app.database import dispose_database, get_session_factory
+from app.async_database import dispose_async_database
 
 
 @asynccontextmanager
@@ -19,7 +20,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             get_session_factory()
         yield
     finally:
-        dispose_database()
+        try:
+            dispose_database()
+        finally:
+            await dispose_async_database()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -33,3 +37,11 @@ async def handle_email_not_found(
     request: Request, exc: EmailNotFoundError
 ) -> JSONResponse:
     return JSONResponse(status_code=404, content={"detail": "Email not found"})
+
+
+@app.exception_handler(InvalidEmailQueryError)
+async def handle_invalid_email_query(
+    request: Request, exc: InvalidEmailQueryError
+) -> JSONResponse:
+    # Use a fixed public message rather than exposing exception internals.
+    return JSONResponse(status_code=422, content={"detail": "Invalid email search parameters"})
