@@ -7,3 +7,6 @@
 !app/*.py
 !test_data/
 !test_data/emails.json
+!alembic.ini
+!migrations/
+!migrations/**
