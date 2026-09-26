@@ -3,6 +3,7 @@
 !Dockerfile
 !.dockerignore
 !pyproject.toml
+!email_data.py
 !app/
 !app/*.py
 !test_data/

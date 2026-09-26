@@ -10,12 +10,13 @@ COPY pyproject.toml ./
 RUN python -c "import subprocess, sys, tomllib; dependencies = tomllib.load(open('pyproject.toml', 'rb'))['project']['dependencies']; subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--no-cache-dir', *dependencies])"
 
 COPY app/ ./app/
+COPY email_data.py ./
 COPY test_data/ ./test_data/
 COPY alembic.ini ./
 COPY migrations/ ./migrations/
 
 # Fail the build if the API or its runtime dependencies cannot be imported.
-RUN python -c "from app.main import app; assert app is not None"
+RUN python -c "from app.main import app; from app.chunk_records import prepare_chunk_record; assert app is not None; assert callable(prepare_chunk_record)"
 
 RUN groupadd --gid 10001 appuser \
     && useradd --uid 10001 --gid appuser --no-create-home \
