@@ -1,0 +1,9 @@
+# Allow only the inputs needed for this backend image.
+**
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!app/
+!app/*.py
+!test_data/
+!test_data/emails.json
